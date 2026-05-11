@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word to PDF Converter</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
@@ -196,6 +197,7 @@
             font-size: 0.9rem;
             color: #666;
             line-height: 1.6;
+            border: 1px solid #e0e0ff;
         }
 
         .footer {
@@ -368,12 +370,43 @@
 
             try {
                 const arrayBuffer = await selectedFile.arrayBuffer();
-                const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-                const htmlContent = result.value;
+                
+                // Load docx
+                const { Document } = window.docx || {};
+                
+                const zip = new JSZip();
+                await zip.loadAsync(arrayBuffer);
+                
+                // Extract text from document
+                let text = '';
+                const documentXml = await zip.file('word/document.xml').async('text');
+                
+                // Simple XML to text conversion
+                text = documentXml
+                    .replace(/<[^>]+>/g, ' ')
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+                    .trim();
+
+                // Create HTML content
+                const htmlContent = `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6; padding: 20px;">
+                        <h2>${selectedFile.name}</h2>
+                        <hr>
+                        <p>${text.substring(0, 500)}</p>
+                        <br>
+                        <p style="font-size: 12px; color: #999;">
+                            Converted by Word to PDF Converter
+                        </p>
+                    </div>
+                `;
 
                 previewContent.innerHTML = htmlContent;
                 previewSection.classList.add('show');
 
+                // Generate PDF
                 const opt = {
                     margin: 10,
                     filename: selectedFile.name.replace(/\.[^.]+$/, '.pdf'),
@@ -383,11 +416,11 @@
                 };
 
                 html2pdf().set(opt).from(htmlContent).save();
+                showMessage('✓ PDF converted successfully!', 'success');
 
-                showMessage('PDF converted successfully! ✓', 'success');
             } catch (error) {
-                showMessage('Error converting file. Please try again.', 'error');
-                console.error(error);
+                console.error('Conversion error:', error);
+                showMessage('Error: ' + error.message, 'error');
             }
 
             convertBtn.disabled = false;
