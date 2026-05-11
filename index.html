@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word to PDF Converter</title>
+    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -31,7 +33,6 @@
             max-width: 700px;
             width: 100%;
             border: 1px solid #404040;
-            backdrop-filter: blur(10px);
         }
 
         .header {
@@ -51,7 +52,6 @@
 
         .header p {
             color: #b0b0b0;
-            font-weight: 300;
         }
 
         .upload-area {
@@ -63,21 +63,6 @@
             background: linear-gradient(135deg, #252525 0%, #2d2d2d 100%);
             margin-bottom: 25px;
             transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upload-area::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity 0.4s;
-            pointer-events: none;
         }
 
         .upload-area:hover {
@@ -85,10 +70,6 @@
             background: linear-gradient(135deg, #2d2d2d 0%, #353535 100%);
             transform: translateY(-3px);
             box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
-        }
-
-        .upload-area:hover::before {
-            opacity: 1;
         }
 
         .upload-area.drag-over {
@@ -100,12 +81,6 @@
         .upload-icon {
             font-size: 3.5rem;
             margin-bottom: 15px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
         }
 
         .upload-text {
@@ -131,30 +106,16 @@
             margin-bottom: 25px;
             display: none;
             border-left: 4px solid #d4af37;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .file-info.show {
             display: block;
-            animation: slideIn 0.4s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .file-name {
             color: #d4af37;
             font-weight: 600;
             margin-bottom: 5px;
-            font-size: 1rem;
         }
 
         .file-size {
@@ -177,8 +138,6 @@
             cursor: pointer;
             font-size: 1rem;
             transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .convert-btn {
@@ -216,8 +175,6 @@
             padding: 20px;
             border-radius: 12px;
             border-left: 4px solid #d4af37;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            animation: slideIn 0.4s ease;
         }
 
         .preview-section.show {
@@ -228,9 +185,6 @@
             color: #d4af37;
             font-weight: 600;
             margin-bottom: 12px;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .preview-content {
@@ -245,45 +199,13 @@
             border: 1px solid #404040;
         }
 
-        .preview-content h1 {
-            color: #d4af37;
-            margin-top: 15px;
-            margin-bottom: 10px;
-            font-size: 1.5rem;
-        }
-
-        .preview-content h2 {
-            color: #d4af37;
-            margin-top: 12px;
-            margin-bottom: 8px;
-            font-size: 1.3rem;
-        }
-
-        .preview-content h3 {
-            color: #c9a927;
-            margin-top: 10px;
-            margin-bottom: 8px;
-        }
-
-        .preview-content p {
-            margin-bottom: 12px;
-        }
-
-        .preview-content strong {
-            color: #d4af37;
-        }
-
-        .preview-content em {
-            color: #b0b0b0;
-        }
-
         .message {
             padding: 15px 20px;
             border-radius: 12px;
             margin-bottom: 20px;
             display: none;
             font-weight: 500;
-            animation: slideIn 0.4s ease;
+            text-align: center;
         }
 
         .message.show {
@@ -294,14 +216,12 @@
             background: linear-gradient(135deg, #1a3d1a 0%, #2d5c2d 100%);
             color: #7cfc00;
             border: 1px solid #4a7c4a;
-            box-shadow: 0 10px 30px rgba(124, 252, 0, 0.15);
         }
 
         .error {
             background: linear-gradient(135deg, #3d1a1a 0%, #5c2d2d 100%);
             color: #ff6b6b;
             border: 1px solid #7c4a4a;
-            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.15);
         }
 
         .footer {
@@ -316,12 +236,6 @@
             color: #d4af37;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .footer a:hover {
-            color: #e6c547;
-            text-decoration: underline;
         }
 
         .spinner {
@@ -333,42 +247,17 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 8px;
+            vertical-align: middle;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #d4af37;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #e6c547;
-        }
-
         @media (max-width: 600px) {
-            .container {
-                margin: 20px;
-                padding: 30px;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
+            .container { margin: 20px; padding: 30px; }
+            .header h1 { font-size: 2rem; }
+            .button-group { flex-direction: column; }
         }
     </style>
 </head>
@@ -384,8 +273,8 @@
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📁</div>
             <div class="upload-text">Click or drag to upload</div>
-            <div class="upload-subtext">Supported: .docx, .doc files</div>
-            <input type="file" id="fileInput" accept=".docx,.doc">
+            <div class="upload-subtext">Supported: .docx files</div>
+            <input type="file" id="fileInput" accept=".docx">
         </div>
 
         <div class="file-info" id="fileInfo">
@@ -418,7 +307,123 @@
         const resetBtn = document.getElementById('resetBtn');
         const previewSection = document.getElementById('previewSection');
         const previewContent = document.getElementById('previewContent');
-        const message = document.getElementById('message');
+        const messageBox = document.getElementById('message');
 
         let selectedFile = null;
-        let file
+
+        function showMessage(text, type) {
+            messageBox.textContent = text;
+            messageBox.className = `message show ${type}`;
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 5000);
+        }
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            if (e.dataTransfer.files[0]) {
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            const fileNameStr = file.name.toLowerCase();
+            if (!fileNameStr.endsWith('.docx')) {
+                showMessage('❌ Please upload a valid .docx file', 'error');
+                return;
+            }
+
+            selectedFile = file;
+            fileName.textContent = `📄 ${file.name}`;
+            fileSize.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
+            fileInfo.classList.add('show');
+            convertBtn.disabled = false;
+            resetBtn.style.display = 'block';
+            
+            previewFile(file);
+        }
+
+        function previewFile(file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
+                    previewContent.innerHTML = result.value || '<p>No content found.</p>';
+                    previewSection.classList.add('show');
+                } catch (error) {
+                    previewContent.innerHTML = '<p style="color: #ff6b6b;">Preview failed.</p>';
+                    previewSection.classList.add('show');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        convertBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            convertBtn.disabled = true;
+            convertBtn.innerHTML = '<span class="spinner"></span>Converting...';
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
+                    const htmlContent = result.value;
+
+                    const container = document.createElement('div');
+                    container.innerHTML = `
+                        <div style="padding: 40px; color: #000; background: #fff; font-family: sans-serif;">
+                            ${htmlContent}
+                        </div>
+                    `;
+
+                    const opt = {
+                        margin: 10,
+                        filename: selectedFile.name.replace('.docx', '.pdf'),
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    await html2pdf().set(opt).from(container).save();
+                    showMessage('✓ PDF converted successfully!', 'success');
+                } catch (error) {
+                    showMessage('❌ Error: ' + error.message, 'error');
+                } finally {
+                    convertBtn.disabled = false;
+                    convertBtn.innerHTML = 'Convert to PDF';
+                }
+            };
+            reader.readAsArrayBuffer(selectedFile);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.classList.remove('show');
+            previewSection.classList.remove('show');
+            resetBtn.style.display = 'none';
+            convertBtn.disabled = true;
+            messageBox.classList.remove('show');
+        });
+    </script>
+</body>
+</html>
