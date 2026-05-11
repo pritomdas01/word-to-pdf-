@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word to PDF Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
@@ -13,20 +14,21 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e0e0e0;
         }
 
         .container {
-            background: white;
+            background: #0f3460;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             padding: 50px;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
         }
 
@@ -37,7 +39,7 @@
 
         .header h1 {
             font-size: 2.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00d4ff 0%, #7b61ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -46,28 +48,29 @@
         }
 
         .header p {
-            color: #666;
+            color: #a0a0a0;
         }
 
         .upload-area {
-            border: 3px dashed #667eea;
+            border: 3px dashed #00d4ff;
             border-radius: 15px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
-            background: #f8f9ff;
+            background: #1a3a52;
             margin-bottom: 25px;
             transition: all 0.3s;
         }
 
         .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f1ff;
+            border-color: #7b61ff;
+            background: #1f4a62;
+            transform: scale(1.02);
         }
 
         .upload-area.drag-over {
-            border-color: #764ba2;
-            background: #e8e9ff;
+            border-color: #7b61ff;
+            background: #2a5a72;
         }
 
         .upload-icon {
@@ -75,20 +78,43 @@
             margin-bottom: 15px;
         }
 
+        .upload-text {
+            color: #e0e0e0;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
         #fileInput {
             display: none;
         }
 
         .file-info {
-            background: #f0f1ff;
+            background: #1a3a52;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 25px;
             display: none;
+            border-left: 4px solid #00d4ff;
         }
 
         .file-info.show {
             display: block;
+        }
+
+        .file-name {
+            color: #e0e0e0;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            color: #a0a0a0;
+            font-size: 0.9rem;
         }
 
         .button-group {
@@ -109,13 +135,13 @@
         }
 
         .convert-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00d4ff 0%, #7b61ff 100%);
             color: white;
         }
 
         .convert-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
         }
 
         .convert-btn:disabled {
@@ -124,14 +150,54 @@
         }
 
         .reset-btn {
-            background: #f0f1ff;
-            color: #667eea;
-            border: 2px solid #667eea;
+            background: #1a3a52;
+            color: #00d4ff;
+            border: 2px solid #00d4ff;
             display: none;
         }
 
         .reset-btn:hover {
-            background: #e8e9ff;
+            background: #2a4a62;
+        }
+
+        .preview-section {
+            margin-bottom: 25px;
+            display: none;
+            background: #1a3a52;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #7b61ff;
+        }
+
+        .preview-section.show {
+            display: block;
+        }
+
+        .preview-label {
+            color: #00d4ff;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .preview-content {
+            background: #0f2438;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            color: #d0d0d0;
+            line-height: 1.6;
+            border: 1px solid #2a5a72;
+        }
+
+        .preview-content h1, .preview-content h2, .preview-content h3 {
+            color: #00d4ff;
+            margin-top: 10px;
+        }
+
+        .preview-content p {
+            margin-bottom: 10px;
         }
 
         .message {
@@ -146,31 +212,82 @@
         }
 
         .success {
-            background: #d4edda;
-            color: #155724;
+            background: #1a4d2e;
+            color: #7cfc00;
+            border: 1px solid #4a7c4e;
         }
 
         .error {
-            background: #f8d7da;
-            color: #721c24;
+            background: #4d1a1a;
+            color: #ff6b6b;
+            border: 1px solid #7c4a4a;
         }
 
         .footer {
-            border-top: 1px solid #eee;
+            border-top: 1px solid #2a5a72;
             padding-top: 20px;
             text-align: center;
-            color: #999;
+            color: #a0a0a0;
             font-size: 0.9rem;
         }
 
         .footer a {
-            color: #667eea;
+            color: #00d4ff;
             text-decoration: none;
             font-weight: 600;
+            transition: all 0.3s;
         }
 
         .footer a:hover {
-            color: #764ba2;
+            color: #7b61ff;
+            text-decoration: underline;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f2438;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00d4ff;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7b61ff;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 30px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -178,21 +295,26 @@
     <div class="container">
         <div class="header">
             <h1>📄 Word to PDF</h1>
-            <p>Convert Word documents to PDF</p>
+            <p>Convert your Word documents to PDF instantly</p>
         </div>
 
         <div class="message" id="message"></div>
 
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📁</div>
-            <div>Click or drag to upload</div>
-            <div style="color: #999; font-size: 0.9rem;">(.docx, .doc files)</div>
+            <div class="upload-text">Click or drag to upload</div>
+            <div class="upload-subtext">Supported: .docx, .doc files</div>
             <input type="file" id="fileInput" accept=".docx,.doc">
         </div>
 
         <div class="file-info" id="fileInfo">
-            <div id="fileName"></div>
-            <div id="fileSize" style="color: #999; font-size: 0.9rem;"></div>
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <div class="preview-label">📋 Preview:</div>
+            <div class="preview-content" id="previewContent"></div>
         </div>
 
         <div class="button-group">
@@ -208,12 +330,17 @@
     <script>
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
         const convertBtn = document.getElementById('convertBtn');
         const resetBtn = document.getElementById('resetBtn');
+        const previewSection = document.getElementById('previewSection');
+        const previewContent = document.getElementById('previewContent');
         const message = document.getElementById('message');
-        const fileInfo = document.getElementById('fileInfo');
 
         let selectedFile = null;
+        let fileHtmlContent = '';
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
@@ -241,57 +368,96 @@
         });
 
         function handleFileSelect(file) {
+            if (!['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'].includes(file.type)) {
+                showMessage('❌ Please upload a valid Word document (.docx or .doc)', 'error');
+                return;
+            }
+
             selectedFile = file;
-            document.getElementById('fileName').textContent = `📄 ${file.name}`;
-            document.getElementById('fileSize').textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
+            fileName.textContent = `📄 ${file.name}`;
+            fileSize.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
             fileInfo.classList.add('show');
             convertBtn.disabled = false;
             resetBtn.style.display = 'block';
             message.classList.remove('show');
+            
+            // Preview the file
+            previewFile(file);
+        }
+
+        function previewFile(file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
+                    fileHtmlContent = result.value;
+                    previewContent.innerHTML = fileHtmlContent;
+                    previewSection.classList.add('show');
+                } catch (error) {
+                    previewContent.innerHTML = '<p style="color: #ff6b6b;">Could not preview file</p>';
+                    previewSection.classList.add('show');
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         convertBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
             convertBtn.disabled = true;
-            convertBtn.innerHTML = '⏳ Converting...';
+            convertBtn.innerHTML = '<span class="spinner"></span>Converting...';
 
             try {
-                // Simple HTML content
-                const htmlContent = `
-                    <div style="font-family: Arial; padding: 20px; line-height: 1.6;">
-                        <h2>${selectedFile.name}</h2>
-                        <hr style="margin: 20px 0;">
-                        <p>Document converted from: ${selectedFile.name}</p>
-                        <p>Conversion time: ${new Date().toLocaleString()}</p>
-                        <br><br>
-                        <p style="font-size: 12px; color: #999; border-top: 1px solid #ccc; padding-top: 10px;">
-                            Made by Pritom - Word to PDF Converter
-                        </p>
-                    </div>
-                `;
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
+                        const htmlContent = result.value;
 
-                const options = {
-                    margin: 10,
-                    filename: selectedFile.name.replace(/\.[^.]+$/, '.pdf'),
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+                        // Style the content for PDF
+                        const styledHtml = `
+                            <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.8; color: #333;">
+                                ${htmlContent}
+                                <hr style="margin-top: 40px; border: none; border-top: 1px solid #ccc;">
+                                <p style="text-align: center; font-size: 12px; color: #999; margin-top: 20px;">
+                                    Made by <strong>Pritom</strong> - Word to PDF Converter
+                                </p>
+                            </div>
+                        `;
+
+                        const opt = {
+                            margin: [10, 10, 10, 10],
+                            filename: selectedFile.name.replace(/\.[^.]+$/, '.pdf'),
+                            image: { type: 'jpeg', quality: 0.98 },
+                            html2canvas: { scale: 2, useCORS: true },
+                            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+                        };
+
+                        html2pdf().set(opt).from(styledHtml).save();
+                        showMessage('✓ PDF converted successfully!', 'success');
+
+                    } catch (error) {
+                        showMessage('❌ Error: ' + error.message, 'error');
+                    }
+
+                    convertBtn.disabled = false;
+                    convertBtn.innerHTML = 'Convert to PDF';
                 };
+                reader.readAsArrayBuffer(selectedFile);
 
-                html2pdf().set(options).from(htmlContent).save();
-                
-                showMessage('✓ PDF created successfully!', 'success');
             } catch (error) {
                 showMessage('❌ Error: ' + error.message, 'error');
+                convertBtn.disabled = false;
+                convertBtn.innerHTML = 'Convert to PDF';
             }
-
-            convertBtn.disabled = false;
-            convertBtn.innerHTML = 'Convert to PDF';
         });
 
         resetBtn.addEventListener('click', () => {
             selectedFile = null;
+            fileHtmlContent = '';
             fileInput.value = '';
             fileInfo.classList.remove('show');
+            previewSection.classList.remove('show');
             convertBtn.disabled = true;
             resetBtn.style.display = 'none';
             message.classList.remove('show');
