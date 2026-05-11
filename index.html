@@ -9,6 +9,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
+        /* Base Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
@@ -19,6 +37,7 @@
             justify-content: center;
             font-family: 'Segoe UI', Tahoma, sans-serif;
             color: #ffffff;
+            overflow-x: hidden;
         }
 
         .container {
@@ -29,6 +48,7 @@
             width: 90%;
             border: 1px solid #404040;
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease-out; /* Page entry animation */
         }
 
         .header h1 {
@@ -48,11 +68,23 @@
             padding: 40px;
             text-align: center;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             background: rgba(255, 255, 255, 0.02);
+            position: relative;
         }
 
-        .upload-area:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
+        .upload-area:hover { 
+            border-color: #d4af37; 
+            background: rgba(212, 175, 55, 0.05);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite; /* Floating icon */
+        }
 
         .file-info {
             margin-top: 20px;
@@ -61,30 +93,51 @@
             border-radius: 10px;
             border-left: 4px solid #d4af37;
             display: none;
+            animation: fadeInUp 0.4s ease-out;
         }
 
-        .preview-section { margin-top: 20px; display: none; }
+        .preview-section { 
+            margin-top: 20px; 
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
 
         .preview-content {
-            background: #ffffff; /* অরিজিনাল ওয়ার্ডের মতো সাদা ব্যাকগ্রাউন্ড */
-            color: #000000;    /* এবং কালো লেখা */
+            background: #ffffff;
+            color: #000000;
             padding: 20px;
             border-radius: 8px;
             max-height: 250px;
             overflow-y: auto;
             border: 1px solid #ddd;
             font-size: 0.9rem;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .button-group { display: flex; gap: 15px; margin-top: 25px; }
 
         button {
             flex: 1; padding: 14px; border-radius: 12px; border: none;
-            font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem;
+            font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 1rem;
         }
 
-        .convert-btn { background: #d4af37; color: #1a1a1a; }
-        .convert-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .convert-btn { 
+            background: #d4af37; 
+            color: #1a1a1a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .convert-btn:not(:disabled) {
+            animation: pulse 2s infinite; /* Attention grabbing pulse */
+        }
+
+        .convert-btn:hover:not(:disabled) {
+            background: #f1c40f;
+            transform: translateY(-2px);
+        }
+
+        .convert-btn:active { transform: translateY(0); }
 
         .reset-btn { 
             background: transparent; 
@@ -93,16 +146,19 @@
             display: none; 
         }
 
+        .reset-btn:hover { background: rgba(212, 175, 55, 0.1); }
+
         .message { 
             margin-top: 15px; text-align: center; padding: 12px; 
             border-radius: 8px; display: none; font-weight: 500;
+            animation: fadeInUp 0.3s ease;
         }
 
         .success { background: #1a3d1a; color: #7cfc00; }
 
         .spinner {
             display: inline-block; width: 16px; height: 16px;
-            border: 2px solid rgba(0,0,0,0.1); border-top-color: #000;
+            border: 2px solid rgba(0,0,0,0.1); border-top-color: #1a1a1a;
             border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px;
             vertical-align: middle;
         }
@@ -120,8 +176,8 @@
         <div id="message" class="message"></div>
 
         <div class="upload-area" id="uploadArea">
-            <div style="font-size: 3.5rem; margin-bottom: 10px;">📁</div>
-            <p id="uploadText">Click or Drag to upload .docx</p>
+            <div class="upload-icon">📁</div>
+            <p id="uploadText" style="font-weight: 500;">Click or Drag to upload .docx</p>
             <input type="file" id="fileInput" accept=".docx" style="display: none;">
         </div>
 
@@ -139,9 +195,12 @@
             <button class="convert-btn" id="convertBtn" disabled>Download PDF</button>
             <button class="reset-btn" id="resetBtn">Reset</button>
         </div>
+
+        <div class="footer" style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #666; border-top: 1px solid #333; padding-top: 20px;">
+            Made by <a href="https://portfolio-tawny-six-16.vercel.app/" target="_blank" style="color: #d4af37; text-decoration: none; font-weight: 600;">Pritom</a>
+        </div>
     </div>
 
-    <!-- Hidden container for high-quality PDF generation -->
     <div id="pdf-container" style="display: none;"></div>
 
     <script>
@@ -178,7 +237,7 @@
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
-                previewContent.innerHTML = result.value || "No content to preview.";
+                previewContent.innerHTML = result.value || "No content found.";
                 document.getElementById('previewSection').style.display = 'block';
             };
             reader.readAsArrayBuffer(file);
@@ -188,49 +247,31 @@
             if (!docxData) return;
 
             convertBtn.disabled = true;
-            convertBtn.innerHTML = '<span class="spinner"></span>Generating PDF...';
+            convertBtn.innerHTML = '<span class="spinner"></span>Processing...';
 
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
                     
-                    // এখানে আমরা একটি ক্লিন 'হোয়াইট ব্যাকগ্রাউন্ড' লেআউট তৈরি করছি পিডিএফের জন্য
                     pdfContainer.style.display = 'block';
                     pdfContainer.innerHTML = `
-                        <div id="pdf-render-area" style="
-                            padding: 20mm; 
-                            background: white; 
-                            color: black; 
-                            font-family: 'Times New Roman', serif; 
-                            line-height: 1.6;
-                            width: 210mm;
-                            min-height: 297mm;
-                        ">
+                        <div id="pdf-render-area" style="padding: 20mm; background: white; color: black; font-family: 'Times New Roman', serif; line-height: 1.6; width: 210mm;">
                             <style>
                                 #pdf-render-area * { color: black !important; background: transparent !important; }
-                                #pdf-render-area p { margin-bottom: 12pt; }
-                                #pdf-render-area h1, #pdf-render-area h2 { margin-top: 20pt; margin-bottom: 10pt; }
-                                #pdf-render-area table { border-collapse: collapse; width: 100%; }
-                                #pdf-render-area td, #pdf-render-area th { border: 1px solid black; padding: 8px; }
                             </style>
                             ${result.value}
                         </div>
                     `;
 
                     const opt = {
-                        margin: 0, // কাস্টম প্যাডিং ভেতরে দেওয়াই ভালো
+                        margin: 0,
                         filename: docxData.name.replace(/\.[^.]+$/, '.pdf'),
                         image: { type: 'jpeg', quality: 1 },
-                        html2canvas: { 
-                            scale: 2, 
-                            useCORS: true, 
-                            backgroundColor: '#ffffff' 
-                        },
+                        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
 
-                    // জেনারেট এবং সেভ
                     await html2pdf().set(opt).from(pdfContainer).save();
                     
                     messageBox.textContent = "✓ PDF Downloaded Successfully!";
@@ -238,11 +279,9 @@
                     messageBox.style.display = "block";
 
                 } catch (err) {
-                    console.error(err);
-                    alert("Something went wrong during conversion.");
+                    alert("Conversion failed!");
                 } finally {
                     pdfContainer.style.display = 'none';
-                    pdfContainer.innerHTML = '';
                     convertBtn.disabled = false;
                     convertBtn.innerHTML = 'Download PDF';
                 }
@@ -250,9 +289,7 @@
             reader.readAsArrayBuffer(docxData);
         };
 
-        resetBtn.onclick = () => {
-            location.reload();
-        };
+        resetBtn.onclick = () => location.reload();
     </script>
 </body>
 </html>
