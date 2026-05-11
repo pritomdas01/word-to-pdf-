@@ -9,140 +9,129 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            background: #0f0f0f;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             color: #ffffff;
         }
 
         .container {
-            background: #1a1a1a;
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
             border-radius: 20px;
             padding: 40px;
-            max-width: 600px;
+            max-width: 650px;
             width: 90%;
-            border: 1px solid #333;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            animation: fadeInUp 0.6s ease-out;
+            border: 1px solid #404040;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
         }
 
         .header h1 {
+            font-size: 2.2rem;
             text-align: center;
-            background: linear-gradient(135deg, #fff, #d4af37);
+            background: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
+        .header p { text-align: center; color: #b0b0b0; margin-bottom: 30px; }
+
         .upload-area {
-            border: 2px dashed #444;
+            border: 2px dashed #505050;
             border-radius: 15px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: 0.3s;
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
         }
 
-        .upload-area:hover { border-color: #d4af37; background: rgba(212,175,55,0.05); }
-
-        .upload-icon {
-            font-size: 3.5rem;
-            display: inline-block;
-            animation: float 3s ease-in-out infinite;
-        }
+        .upload-area:hover { border-color: #d4af37; background: rgba(212, 175, 55, 0.05); }
 
         .file-info {
             margin-top: 20px;
             padding: 15px;
             background: #252525;
+            border-radius: 10px;
             border-left: 4px solid #d4af37;
             display: none;
-            animation: fadeInUp 0.4s ease;
         }
 
-        .preview-section { 
-            margin-top: 20px; 
-            display: none; 
-            animation: fadeInUp 0.5s ease;
-        }
+        .preview-section { margin-top: 20px; display: none; }
 
         .preview-content {
-            background: #ffffff;
-            color: #000;
+            background: #ffffff; /* অরিজিনাল ওয়ার্ডের মতো সাদা ব্যাকগ্রাউন্ড */
+            color: #000000;    /* এবং কালো লেখা */
             padding: 20px;
             border-radius: 8px;
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
-            font-size: 14px;
+            border: 1px solid #ddd;
+            font-size: 0.9rem;
         }
 
         .button-group { display: flex; gap: 15px; margin-top: 25px; }
 
         button {
-            flex: 1; padding: 14px; border-radius: 10px; border: none;
-            font-weight: bold; cursor: pointer; transition: 0.3s;
+            flex: 1; padding: 14px; border-radius: 12px; border: none;
+            font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem;
         }
 
-        .convert-btn { background: #d4af37; color: #000; }
+        .convert-btn { background: #d4af37; color: #1a1a1a; }
         .convert-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .convert-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
 
-        .reset-btn { background: transparent; border: 1px solid #444; color: #ccc; display: none; }
+        .reset-btn { 
+            background: transparent; 
+            border: 1px solid #d4af37; 
+            color: #d4af37; 
+            display: none; 
+        }
+
+        .message { 
+            margin-top: 15px; text-align: center; padding: 12px; 
+            border-radius: 8px; display: none; font-weight: 500;
+        }
+
+        .success { background: #1a3d1a; color: #7cfc00; }
 
         .spinner {
             display: inline-block; width: 16px; height: 16px;
-            border: 2px solid rgba(0,0,0,0.2); border-top-color: #000;
-            border-radius: 50%; animation: spin 0.8s linear infinite;
+            border: 2px solid rgba(0,0,0,0.1); border-top-color: #000;
+            border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px;
+            vertical-align: middle;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Hidden PDF Export Styling - CRITICAL FIX */
-        #pdf-export-node {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-            width: 210mm;
-            background: white;
-            color: black;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>📄 Word to PDF</h1>
+            <p>Convert with original formatting</p>
         </div>
 
+        <div id="message" class="message"></div>
+
         <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📁</div>
-            <p>Click or Drag to upload .docx</p>
+            <div style="font-size: 3.5rem; margin-bottom: 10px;">📁</div>
+            <p id="uploadText">Click or Drag to upload .docx</p>
             <input type="file" id="fileInput" accept=".docx" style="display: none;">
         </div>
 
         <div class="file-info" id="fileInfo">
-            <div id="fileName" style="color: #d4af37; font-weight: bold;"></div>
-            <div id="fileSize" style="font-size: 0.8rem; color: #888;"></div>
+            <div id="fileName" style="font-weight: bold; color: #d4af37; margin-bottom: 5px;"></div>
+            <div id="fileSize" style="font-size: 0.85rem; color: #aaa;"></div>
         </div>
 
         <div class="preview-section" id="previewSection">
-            <p style="margin-bottom: 5px; font-size: 0.9rem; color: #d4af37;">Preview:</p>
+            <p style="margin-bottom: 8px; font-size: 0.9rem; color: #d4af37;">📋 Document Preview:</p>
             <div class="preview-content" id="previewContent"></div>
         </div>
 
@@ -152,8 +141,8 @@
         </div>
     </div>
 
-    <!-- This node is purely for PDF generation to avoid "Blank PDF" issues -->
-    <div id="pdf-export-node"></div>
+    <!-- Hidden container for high-quality PDF generation -->
+    <div id="pdf-container" style="display: none;"></div>
 
     <script>
         const fileInput = document.getElementById('fileInput');
@@ -161,69 +150,109 @@
         const convertBtn = document.getElementById('convertBtn');
         const resetBtn = document.getElementById('resetBtn');
         const previewContent = document.getElementById('previewContent');
-        const exportNode = document.getElementById('pdf-export-node');
+        const messageBox = document.getElementById('message');
+        const pdfContainer = document.getElementById('pdf-container');
 
-        let currentFile = null;
+        let docxData = null;
 
         uploadArea.onclick = () => fileInput.click();
 
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
-            if (file && file.name.endsWith('.docx')) {
-                currentFile = file;
-                document.getElementById('fileName').textContent = file.name;
-                document.getElementById('fileSize').textContent = (file.size/1024).toFixed(2) + ' KB';
-                document.getElementById('fileInfo').style.display = 'block';
-                convertBtn.disabled = false;
-                resetBtn.style.display = 'block';
-
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
-                    previewContent.innerHTML = result.value;
-                    document.getElementById('previewSection').style.display = 'block';
-                };
-                reader.readAsArrayBuffer(file);
-            }
+            if (file) handleFile(file);
         };
 
-        convertBtn.onclick = async () => {
-            convertBtn.disabled = true;
-            convertBtn.innerHTML = '<span class="spinner"></span>';
-
+        function handleFile(file) {
+            if (!file.name.toLowerCase().endsWith('.docx')) {
+                alert('Please upload a .docx file!');
+                return;
+            }
+            
+            docxData = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+            document.getElementById('fileInfo').style.display = 'block';
+            convertBtn.disabled = false;
+            resetBtn.style.display = 'block';
+            
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
-                
-                // Injecting into a clean, hidden node for PDF generation
-                exportNode.innerHTML = `
-                    <div style="padding: 20mm; color: black !important; background: white !important; font-family: 'Times New Roman', serif;">
-                        <style>p { margin-bottom: 10pt; }</style>
-                        ${result.value}
-                    </div>
-                `;
+                previewContent.innerHTML = result.value || "No content to preview.";
+                document.getElementById('previewSection').style.display = 'block';
+            };
+            reader.readAsArrayBuffer(file);
+        }
 
-                const opt = {
-                    margin: 0,
-                    filename: currentFile.name.replace('.docx', '.pdf'),
-                    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
+        convertBtn.onclick = async () => {
+            if (!docxData) return;
 
+            convertBtn.disabled = true;
+            convertBtn.innerHTML = '<span class="spinner"></span>Generating PDF...';
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
                 try {
-                    await html2pdf().set(opt).from(exportNode).save();
+                    const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
+                    
+                    // এখানে আমরা একটি ক্লিন 'হোয়াইট ব্যাকগ্রাউন্ড' লেআউট তৈরি করছি পিডিএফের জন্য
+                    pdfContainer.style.display = 'block';
+                    pdfContainer.innerHTML = `
+                        <div id="pdf-render-area" style="
+                            padding: 20mm; 
+                            background: white; 
+                            color: black; 
+                            font-family: 'Times New Roman', serif; 
+                            line-height: 1.6;
+                            width: 210mm;
+                            min-height: 297mm;
+                        ">
+                            <style>
+                                #pdf-render-area * { color: black !important; background: transparent !important; }
+                                #pdf-render-area p { margin-bottom: 12pt; }
+                                #pdf-render-area h1, #pdf-render-area h2 { margin-top: 20pt; margin-bottom: 10pt; }
+                                #pdf-render-area table { border-collapse: collapse; width: 100%; }
+                                #pdf-render-area td, #pdf-render-area th { border: 1px solid black; padding: 8px; }
+                            </style>
+                            ${result.value}
+                        </div>
+                    `;
+
+                    const opt = {
+                        margin: 0, // কাস্টম প্যাডিং ভেতরে দেওয়াই ভালো
+                        filename: docxData.name.replace(/\.[^.]+$/, '.pdf'),
+                        image: { type: 'jpeg', quality: 1 },
+                        html2canvas: { 
+                            scale: 2, 
+                            useCORS: true, 
+                            backgroundColor: '#ffffff' 
+                        },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    // জেনারেট এবং সেভ
+                    await html2pdf().set(opt).from(pdfContainer).save();
+                    
+                    messageBox.textContent = "✓ PDF Downloaded Successfully!";
+                    messageBox.className = "message success show";
+                    messageBox.style.display = "block";
+
                 } catch (err) {
-                    alert("Error creating PDF");
+                    console.error(err);
+                    alert("Something went wrong during conversion.");
                 } finally {
-                    exportNode.innerHTML = '';
+                    pdfContainer.style.display = 'none';
+                    pdfContainer.innerHTML = '';
                     convertBtn.disabled = false;
                     convertBtn.innerHTML = 'Download PDF';
                 }
             };
-            reader.readAsArrayBuffer(currentFile);
+            reader.readAsArrayBuffer(docxData);
         };
 
-        resetBtn.onclick = () => location.reload();
+        resetBtn.onclick = () => {
+            location.reload();
+        };
     </script>
 </body>
 </html>
