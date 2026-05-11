@@ -90,11 +90,6 @@
             font-size: 1.1rem;
         }
 
-        .upload-subtext {
-            color: #888888;
-            font-size: 0.9rem;
-        }
-
         #fileInput {
             display: none;
         }
@@ -116,11 +111,6 @@
             color: #d4af37;
             font-weight: 600;
             margin-bottom: 5px;
-        }
-
-        .file-size {
-            color: #888888;
-            font-size: 0.9rem;
         }
 
         .button-group {
@@ -146,11 +136,6 @@
             box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
         }
 
-        .convert-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
-        }
-
         .convert-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -161,11 +146,6 @@
             color: #d4af37;
             border: 1.5px solid #d4af37;
             display: none;
-        }
-
-        .reset-btn:hover {
-            background: linear-gradient(135deg, #353535 0%, #3d3d3d 100%);
-            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.25);
         }
 
         .preview-section {
@@ -179,12 +159,6 @@
 
         .preview-section.show {
             display: block;
-        }
-
-        .preview-label {
-            color: #d4af37;
-            font-weight: 600;
-            margin-bottom: 12px;
         }
 
         .preview-content {
@@ -208,21 +182,9 @@
             text-align: center;
         }
 
-        .message.show {
-            display: block;
-        }
-
-        .success {
-            background: linear-gradient(135deg, #1a3d1a 0%, #2d5c2d 100%);
-            color: #7cfc00;
-            border: 1px solid #4a7c4a;
-        }
-
-        .error {
-            background: linear-gradient(135deg, #3d1a1a 0%, #5c2d2d 100%);
-            color: #ff6b6b;
-            border: 1px solid #7c4a4a;
-        }
+        .message.show { display: block; }
+        .success { background: #1a3d1a; color: #7cfc00; border: 1px solid #4a7c4a; }
+        .error { background: #3d1a1a; color: #ff6b6b; border: 1px solid #7c4a4a; }
 
         .footer {
             border-top: 1px solid #404040;
@@ -232,11 +194,7 @@
             font-size: 0.9rem;
         }
 
-        .footer a {
-            color: #d4af37;
-            text-decoration: none;
-            font-weight: 600;
-        }
+        .footer a { color: #d4af37; text-decoration: none; font-weight: 600; }
 
         .spinner {
             display: inline-block;
@@ -250,15 +208,7 @@
             vertical-align: middle;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 600px) {
-            .container { margin: 20px; padding: 30px; }
-            .header h1 { font-size: 2rem; }
-            .button-group { flex-direction: column; }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -283,7 +233,7 @@
         </div>
 
         <div class="preview-section" id="previewSection">
-            <div class="preview-label">📋 Preview:</div>
+            <div class="preview-label" style="color: #d4af37; font-weight: 600; margin-bottom: 10px;">📋 Preview:</div>
             <div class="preview-content" id="previewContent"></div>
         </div>
 
@@ -297,6 +247,9 @@
         </div>
     </div>
 
+    <!-- Hidden Worker for PDF generation -->
+    <div id="pdfWorker" style="position: absolute; left: -9999px; top: 0; width: 700px; background: white; color: black; padding: 40px; display: none;"></div>
+
     <script>
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -308,77 +261,57 @@
         const previewSection = document.getElementById('previewSection');
         const previewContent = document.getElementById('previewContent');
         const messageBox = document.getElementById('message');
+        const pdfWorker = document.getElementById('pdfWorker');
 
         let selectedFile = null;
 
         function showMessage(text, type) {
             messageBox.textContent = text;
             messageBox.className = `message show ${type}`;
-            setTimeout(() => {
-                messageBox.classList.remove('show');
-            }, 5000);
+            setTimeout(() => messageBox.classList.remove('show'), 5000);
         }
 
         uploadArea.addEventListener('click', () => fileInput.click());
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('drag-over');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('drag-over');
-        });
-
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('drag-over');
-            if (e.dataTransfer.files[0]) {
-                handleFileSelect(e.dataTransfer.files[0]);
-            }
+            if (e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]);
         });
 
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                handleFileSelect(e.target.files[0]);
-            }
+            if (e.target.files[0]) handleFileSelect(e.target.files[0]);
         });
 
         function handleFileSelect(file) {
-            const fileNameStr = file.name.toLowerCase();
-            if (!fileNameStr.endsWith('.docx')) {
+            if (!file.name.toLowerCase().endsWith('.docx')) {
                 showMessage('❌ Please upload a valid .docx file', 'error');
                 return;
             }
-
             selectedFile = file;
             fileName.textContent = `📄 ${file.name}`;
             fileSize.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
             fileInfo.classList.add('show');
             convertBtn.disabled = false;
             resetBtn.style.display = 'block';
-            
             previewFile(file);
         }
 
-        function previewFile(file) {
+        async function previewFile(file) {
             const reader = new FileReader();
             reader.onload = async (e) => {
-                try {
-                    const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
-                    previewContent.innerHTML = result.value || '<p>No content found.</p>';
-                    previewSection.classList.add('show');
-                } catch (error) {
-                    previewContent.innerHTML = '<p style="color: #ff6b6b;">Preview failed.</p>';
-                    previewSection.classList.add('show');
-                }
+                const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
+                previewContent.innerHTML = result.value;
+                previewSection.classList.add('show');
             };
             reader.readAsArrayBuffer(file);
         }
 
         convertBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
-
+            
             convertBtn.disabled = true;
             convertBtn.innerHTML = '<span class="spinner"></span>Converting...';
 
@@ -386,28 +319,27 @@
             reader.onload = async (e) => {
                 try {
                     const result = await mammoth.convertToHtml({ arrayBuffer: e.target.result });
-                    const htmlContent = result.value;
-
-                    const container = document.createElement('div');
-                    container.innerHTML = `
-                        <div style="padding: 40px; color: #000; background: #fff; font-family: sans-serif;">
-                            ${htmlContent}
-                        </div>
-                    `;
+                    
+                    // ব্ল্যাঙ্ক সমস্যা সমাধানের জন্য এখানে টেম্পোরারি কন্টেইনারে কন্টেন্ট ইনজেক্ট করা হচ্ছে
+                    pdfWorker.style.display = 'block';
+                    pdfWorker.innerHTML = result.value;
 
                     const opt = {
-                        margin: 10,
+                        margin: 15,
                         filename: selectedFile.name.replace('.docx', '.pdf'),
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
 
-                    await html2pdf().set(opt).from(container).save();
-                    showMessage('✓ PDF converted successfully!', 'success');
-                } catch (error) {
-                    showMessage('❌ Error: ' + error.message, 'error');
+                    // html2pdf-কে কল করা
+                    await html2pdf().set(opt).from(pdfWorker).save();
+                    
+                    showMessage('✓ PDF downloaded successfully!', 'success');
+                } catch (err) {
+                    showMessage('❌ Conversion failed!', 'error');
                 } finally {
+                    pdfWorker.style.display = 'none';
                     convertBtn.disabled = false;
                     convertBtn.innerHTML = 'Convert to PDF';
                 }
@@ -420,9 +352,8 @@
             fileInput.value = '';
             fileInfo.classList.remove('show');
             previewSection.classList.remove('show');
-            resetBtn.style.display = 'none';
             convertBtn.disabled = true;
-            messageBox.classList.remove('show');
+            resetBtn.style.display = 'none';
         });
     </script>
 </body>
